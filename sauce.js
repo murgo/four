@@ -80,13 +80,14 @@
     } else if (window.attachEvent) {
         window.attachEvent('load', init);
     }
-    
+
+    var top;
     function pipe() {
         var w = $(window).width() - 25;
         var h = $(window).height() - 25;
         var pipe = $("#pipe");
         var left = (w - pipe.width()) / 2;
-        var top = h - pipe.height();
+        top = h - pipe.height();
         pipe.css({top: top, left: left});
 
         var inputDiv = $("#board-div");
@@ -180,11 +181,12 @@
         sprite.yScale = ratio;
         
         var x = _engine.render.options.width / 2;
-        var y = _engine.render.options.height / 2;
+        //var y = _engine.render.options.height / 2;
+		var y = top - 100;
 
         var body = Bodies.rectangle(x, y, w, h, { angle: Common.random(0, 2*Math.PI), torque: Common.random(0, 150) * ratio, render: { sprite: sprite } });
         body.shit = shit;
-        Body.applyForce(body, { x: x, y: y } , { x: Common.random(-2, 2) * ratio, y: Common.random(-2, 0) * ratio });
+        Body.applyForce(body, { x: x, y: y } , { x: Common.random(-1.5, 1.5) * ratio, y: Common.random(-3, 0) * ratio });
         return body;
     }
 
