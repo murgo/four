@@ -252,7 +252,7 @@
             var body = allBodies[i];
             var position = {x: mouseEvent.offsetX, y: mouseEvent.offsetY};
             if (Matter.Bounds.contains(body.bounds, position) && Matter.Vertices.contains(body.vertices, position)) {
-                window.location.href = "http://boards.4chan.org/b/thread/" + body.shit.thread + "/" + (body.shit.post ? "#p" + body.shit.post : "");
+                window.location.href = "http://boards.4chan.org/" + board + "/thread/" + body.shit.thread + "/" + (body.shit.post ? "#p" + body.shit.post : "");
             }
         }
     }
