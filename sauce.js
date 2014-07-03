@@ -71,6 +71,8 @@
             renderOptions.showShadows = true;
             
         loadImages();
+        
+        _engine.render.canvas.ondblclick = onCanvasClick;
     };
 
     if (window.addEventListener) {
@@ -95,7 +97,10 @@
             if(event.keyCode == 13){
                 window.location.href = "?board=" + input.val();
             }
-        });        
+        });
+
+        var github = $("#github");
+        github.css({ top: 10, left: (w - github.width()) / 2 });
 
         var pipewidth1 = 235;
         var pipeheight1 = 89;
@@ -166,7 +171,7 @@
             renderOptions.showDebug = true;
     };
 
-    function createBody(url, width, height) {
+    function createBody(url, width, height, shit) {
         var sprite = { texture: url };
         var w = Common.random(50, 200);
         var ratio = w / width;
@@ -178,21 +183,14 @@
         var y = _engine.render.options.height / 2;
 
         var body = Bodies.rectangle(x, y, w, h, { angle: Common.random(0, 2*Math.PI), torque: Common.random(0, 150) * ratio, render: { sprite: sprite } });
+        body.shit = shit;
         Body.applyForce(body, { x: x, y: y } , { x: Common.random(-2, 2) * ratio, y: Common.random(-2, 0) * ratio });
         return body;
     }
-    
-    function imageLoaded(url, width, height) {
+
+    function imageLoaded(url, width, height, shit) {
         var _world = _engine.world;
-
-        /*
-        var stack = Composites.stack(20, 20, 15, 4, 0, 0, function(x, y, column, row) {
-            return createBody(url, x, y, width, height);
-        });
-
-        World.add(_world, stack);
-        */
-        World.add(_world, createBody(url, width, height));
+        World.add(_world, createBody(url, width, height, shit));
     };
     
     var board = 'b';
@@ -205,12 +203,10 @@
     function parseJson(js) {
         if (typeof js == "object") {
             if (js.ext !== undefined && js.tim !== undefined) {
-                //parsed.push(js.tim + js.ext);
-                parsed.push(js.tim + "s.jpg"); // thumbnail
+                parsed.push({ tim: js.tim, ext: js.ext, thread: js.resto == 0 ? js.no : js.resto, post: js.resto == 0 ? null : js.no });
             }
-        
+
             $.each(js, function(k,v) {
-                // k is either an array index or object key
                 parseJson(v);
             });
         }
@@ -222,19 +218,17 @@
             loadImage(0);
         });
     };
-    
+
     function loadImage(i) {
         var img = new Image();
         img.addEventListener('load', function() {
-            imageLoaded(img.src, img.naturalWidth, img.naturalHeight);
-            setTimeout(function() { loadImage(i + 1); }, 1000);
+            imageLoaded(img.src, img.naturalWidth, img.naturalHeight, parsed[i]);
+            setTimeout(function() { loadImage(i + 1); }, 666);
         }, false);
         img.addEventListener('error', function() {
-            setTimeout(function() { loadImage(i + 1); }, 1000);
+            setTimeout(function() { loadImage(i + 1); }, 666);
         }, false);
-        img.addEventListener('click', function() { console.log('clicked' + parsed[i] )}, false);
-        //img.src = "http://t.4cdn.org/" + board + "/" + parsed[i];
-        img.src = "t/" + board + "/" + parsed[i];
+        img.src = "t/" + board + "/" + parsed[i].tim + "s.jpg";
     }
 
     function getSearchParameters() {
@@ -250,5 +244,16 @@
             params[tmparr[0]] = tmparr[1];
         }
         return params;
+    }
+
+    function onCanvasClick(mouseEvent) {
+        var allBodies = Composite.allBodies(_engine.world);
+        for (var i = 0; i < allBodies.length; i++) {
+            var body = allBodies[i];
+            var position = {x: mouseEvent.offsetX, y: mouseEvent.offsetY};
+            if (Matter.Bounds.contains(body.bounds, position) && Matter.Vertices.contains(body.vertices, position)) {
+                window.location.href = "http://boards.4chan.org/b/thread/" + body.shit.thread + "/" + (body.shit.post ? "#p" + body.shit.post : "");
+            }
+        }
     }
 })();
